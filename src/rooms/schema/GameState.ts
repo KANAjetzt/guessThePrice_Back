@@ -18,7 +18,7 @@ export class PlayerState extends Schema {
   constructor(
     id: string,
     name: string = generateName(),
-    guessedPrice: number = undefined,
+    guessedPrice: number = 0,
     score: number = 0
   ) {
     super();

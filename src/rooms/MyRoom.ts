@@ -30,10 +30,16 @@ export class MyRoom extends Room {
 
     awaitProduct();
 
-    this.onMessage('type', (client, message) => {
-      //
-      // handle "type" message
-      //
+    this.onMessage('guessedPrice', (client, message) => {
+      console.log(client.sessionId, "sent 'action' message: ", message);
+
+      // Get the index of the player that guessed the price
+      const index = this.state.playerStates.findIndex(
+        (e: any) => e.id === client.sessionId
+      );
+
+      // Update guessedPrice in player state
+      this.state.playerStates[index].guessedPrice = message.guessedPrice;
     });
   }
 
