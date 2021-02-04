@@ -1,34 +1,100 @@
-import { Schema, type } from '@colyseus/schema';
+import { Schema, ArraySchema, MapSchema, type } from '@colyseus/schema';
+
+class FeatureBullets extends Schema {
+  @type('string')
+  feature: string;
+}
+
+class TechnicalDetails extends Schema {
+  @type('string')
+  heading: string;
+
+  @type('string')
+  text: string;
+}
+
+class MediumImgs extends Schema {
+  @type('string')
+  url: string;
+}
+
+class LargeImgs extends Schema {
+  @type('string')
+  url: string;
+}
+export class Imgs extends Schema {
+  @type(['string'])
+  mediumImgs: string[];
+
+  @type(['string'])
+  largeImgs: string[];
+
+  constructor(mediumImgs: string[] = [], largeImgs: string[] = []) {
+    super();
+    this.mediumImgs = mediumImgs;
+    this.largeImgs = largeImgs;
+  }
+}
 
 export class Product extends Schema {
   @type('number')
-  productPrice: number;
+  creationDate: number;
 
   @type('string')
-  productTitle: string;
+  link: string;
 
   @type('string')
-  productDescription: string;
+  searchterm: string;
 
   @type('string')
-  productStars: string;
+  title: string;
+
+  @type('number')
+  price: number;
 
   @type('string')
-  productImg: string;
+  ratingStars: string;
+
+  @type('number')
+  ratingCount: number;
+
+  @type(['string'])
+  featureBullets: string[];
+
+  @type({ map: 'string' })
+  technicalDetails: { map: 'string' };
+
+  @type('string')
+  description: string;
+
+  @type([Imgs])
+  imgs: Imgs;
 
   constructor(
-    productPrice: number = 1000,
-    productTitle: string = 'Loading Title',
-    productDescription: string = 'Loading Description',
-    productStars: string = 'Loading Rating',
-    productImg: string = 'Loading Image'
+    creationDate: number = 0,
+    link: string = 'Loading Link',
+    searchterm: string = 'Loading Searchterm',
+    title: string = 'Loading Title',
+    price: number = 1000,
+    ratingStars: string = 'Loading Star Rating',
+    ratingCount: number = 0,
+    featureBullets: string[] = [],
+    technicalDetails: { map: 'string' },
+    description: string = 'Loading Description',
+    imgs: Imgs
   ) {
     super();
-    this.productPrice = productPrice;
-    this.productTitle = productTitle;
-    this.productDescription = productDescription;
-    this.productStars = productStars;
-    this.productImg = productImg;
+    this.creationDate = creationDate;
+    this.link = link;
+    this.searchterm = searchterm;
+    this.title = title;
+    this.price = price;
+    this.ratingStars = ratingStars;
+    this.ratingCount = ratingCount;
+    this.featureBullets = featureBullets;
+    this.technicalDetails = technicalDetails;
+    this.description = description;
+    this.imgs = imgs;
   }
 }
 

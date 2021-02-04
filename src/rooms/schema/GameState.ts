@@ -1,5 +1,5 @@
-import { Schema, ArraySchema, type } from '@colyseus/schema';
-import { Product } from './MyRoomState';
+import { Schema, MapSchema, ArraySchema, type } from '@colyseus/schema';
+import { Product, Imgs } from './MyRoomState';
 import { generateName } from '../../utils/name';
 
 export class PlayerState extends Schema {
@@ -35,9 +35,33 @@ export class GameState extends Schema {
   @type(Product)
   currentProduct: Product;
 
-  constructor(currentProduct: Product = new Product()) {
+  @type('number')
+  currentRound: number;
+
+  @type('boolean')
+  isRoundScoreCalculated: boolean;
+
+  @type('boolean')
+  roundEnded: boolean;
+
+  constructor() {
     super();
     this.playerStates = new ArraySchema();
-    this.currentProduct = currentProduct;
+    this.currentProduct = new Product(
+      0,
+      'Loading Link',
+      'Loading Searchterm',
+      'Loading Title',
+      1000,
+      'Loading Star Rating',
+      0,
+      [],
+      { map: 'string' },
+      'Loading Description',
+      new Imgs([''], [''])
+    );
+    this.currentRound = 0;
+    this.isRoundScoreCalculated = false;
+    this.roundEnded = false;
   }
 }

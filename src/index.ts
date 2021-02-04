@@ -31,7 +31,6 @@ mongoose
 
 app.use(cors());
 app.use(express.json());
-
 const server = http.createServer(app);
 const gameServer = new Server({
   server
