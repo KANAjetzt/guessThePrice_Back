@@ -1,19 +1,19 @@
-import { Schema, MapSchema, ArraySchema, type } from '@colyseus/schema';
-import { Product, Imgs } from './MyRoomState';
-import { generateName } from '../../utils/name';
+import { Schema, MapSchema, ArraySchema, type } from '@colyseus/schema'
+import { Product, Products, Imgs } from './MyRoomState'
+import { generateName } from '../../utils/name'
 
 export class PlayerState extends Schema {
   @type('string')
-  id: string;
+  id: string
 
   @type('string')
-  name: string;
+  name: string
 
   @type('number')
-  guessedPrice: number;
+  guessedPrice: number
 
   @type('number')
-  score: number;
+  score: number
 
   constructor(
     id: string,
@@ -21,32 +21,35 @@ export class PlayerState extends Schema {
     guessedPrice: number = 0,
     score: number = 0
   ) {
-    super();
-    this.id = id;
-    this.name = name;
-    this.guessedPrice = guessedPrice;
-    this.score = score;
+    super()
+    this.id = id
+    this.name = name
+    this.guessedPrice = guessedPrice
+    this.score = score
   }
 }
 export class GameState extends Schema {
   @type([PlayerState])
-  playerStates: PlayerState[];
+  playerStates: PlayerState[]
 
   @type(Product)
-  currentProduct: Product;
+  currentProduct: Product
+
+  @type([Product])
+  products: [Product]
 
   @type('number')
-  currentRound: number;
+  currentRound: number
 
   @type('boolean')
-  isRoundScoreCalculated: boolean;
+  isRoundScoreCalculated: boolean
 
   @type('boolean')
-  roundEnded: boolean;
+  roundEnded: boolean
 
   constructor() {
-    super();
-    this.playerStates = new ArraySchema();
+    super()
+    this.playerStates = new ArraySchema()
     this.currentProduct = new Product(
       0,
       'Loading Link',
@@ -59,9 +62,25 @@ export class GameState extends Schema {
       { map: 'string' },
       'Loading Description',
       new Imgs([''], [''])
-    );
-    this.currentRound = 0;
-    this.isRoundScoreCalculated = false;
-    this.roundEnded = false;
+    )
+    this.products = [
+      new Product(
+        0,
+        'Loading Link',
+        'Loading Searchterm',
+        'Loading Title',
+        1000,
+        'Loading Star Rating',
+        0,
+        [],
+        { map: 'string' },
+        'Loading Description',
+        new Imgs([''], [''])
+      )
+    ]
+
+    this.currentRound = 0
+    this.isRoundScoreCalculated = false
+    this.roundEnded = false
   }
 }

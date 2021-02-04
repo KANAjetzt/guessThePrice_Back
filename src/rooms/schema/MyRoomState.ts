@@ -1,27 +1,5 @@
 import { Schema, ArraySchema, MapSchema, type } from '@colyseus/schema';
 
-class FeatureBullets extends Schema {
-  @type('string')
-  feature: string;
-}
-
-class TechnicalDetails extends Schema {
-  @type('string')
-  heading: string;
-
-  @type('string')
-  text: string;
-}
-
-class MediumImgs extends Schema {
-  @type('string')
-  url: string;
-}
-
-class LargeImgs extends Schema {
-  @type('string')
-  url: string;
-}
 export class Imgs extends Schema {
   @type(['string'])
   mediumImgs: string[];
@@ -95,6 +73,16 @@ export class Product extends Schema {
     this.technicalDetails = technicalDetails;
     this.description = description;
     this.imgs = imgs;
+  }
+}
+
+export class Products extends Schema {
+  @type([Product])
+  products: [Product];
+
+  constructor(products: [Product]) {
+    super();
+    this.products = products;
   }
 }
 
