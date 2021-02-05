@@ -23,7 +23,6 @@ const getProducts = async () => {
 export class MyRoom extends Room {
   // Calculate player score
   getScore(productPrice: number, playerGuessedPrice: number) {
-    console.log(productPrice, playerGuessedPrice)
     let difference = productPrice - playerGuessedPrice
     if (difference < 0) difference = difference * -1
     // percentage to the actual price
@@ -69,6 +68,7 @@ export class MyRoom extends Room {
     this.state.currentRound++
 
     // Reset player guessedPrice
+    this.state.playerStates.forEach((player: any) => (player.guessedPrice = 0))
 
     // Set new currentProduct
     this.state.currentProduct = this.getProduct(
@@ -81,12 +81,10 @@ export class MyRoom extends Room {
     // Calculate player scores
     if (!this.state.isRoundScoreCalculated) {
       players.forEach((player: any) => {
-        const score = this.getScore(
+        player.score += this.getScore(
           this.state.currentProduct.price,
           player.guessedPrice
         )
-        console.log(score)
-        player.score = score
       })
       this.state.isRoundScoreCalculated = true
     }
