@@ -47,6 +47,12 @@ export class GameState extends Schema {
   @type('boolean')
   roundEnded: boolean
 
+  @type('boolean')
+  gameEnded: boolean
+
+  @type('boolean')
+  isGameEnded: boolean
+
   constructor() {
     super()
     this.playerStates = new ArraySchema()
@@ -82,5 +88,7 @@ export class GameState extends Schema {
     this.currentRound = 0
     this.isRoundScoreCalculated = false
     this.roundEnded = false
+    this.gameEnded = false
+    this.isGameEnded = false
   }
 }

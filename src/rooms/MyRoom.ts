@@ -14,21 +14,24 @@ const getProducts = async () => {
   const productCount = await ProductModel.estimatedDocumentCount()
 
   const products = await ProductModel.find()
-    .skip(getRandomArbitrary(0, productCount - 10))
-    .limit(10)
+    .skip(getRandomArbitrary(0, productCount - 2))
+    .limit(2)
 
   return products
 }
 
 export class MyRoom extends Room {
   // Calculate player score
-  getScore(productPrice: number, playerGuessedPrice: number) {
+  getScore = (productPrice = 0, playerGuessedPrice = 0) => {
     let difference = productPrice - playerGuessedPrice
     if (difference < 0) difference = difference * -1
+    if (difference > productPrice) return 0
     // percentage to the actual price
-    const percentage = (productPrice / 100 / difference).toFixed(2)
+    const percentage = parseFloat(
+      ((100 / productPrice) * difference).toFixed(2)
+    )
     // create score
-    return (100 - parseInt(percentage.split('.')[1], 10)) * 10
+    return Math.floor((100 - percentage) * 10)
   }
 
   // Get product from products state
@@ -90,6 +93,14 @@ export class MyRoom extends Room {
     }
   }
 
+  endGame() {
+    // Show scoreboard
+    if (!this.state.isGameEnded) {
+      console.log('game has ended')
+      this.state.isGameEnded = true
+    }
+  }
+
   onCreate(options: any) {
     // Initialize GameState
     this.setState(new GameState())
@@ -123,8 +134,14 @@ export class MyRoom extends Room {
     })()
 
     this.setSimulationInterval(() => {
-      // Check if round has ended
+      // Check if game has ended
+      if (this.state.gameEnded) {
+        this.endGame()
+        return
+      }
+
       if (this.state.roundEnded) {
+        // Check if round has ended
         this.endRound(this.state.playerStates)
       }
       if (this.state.isRoundScoreCalculated) {
@@ -140,8 +157,14 @@ export class MyRoom extends Room {
         message,
         this.state.playerStates
       )
-      // If all players guessed a price end the round
-      if (allPlayersGuessed) {
+      // If all players guessed a price end the round or game
+      if (
+        allPlayersGuessed &&
+        this.state.currentRound === this.state.products.length - 1
+      ) {
+        this.state.roundEnded = true
+        this.state.gameEnded = true
+      } else if (allPlayersGuessed) {
         this.state.roundEnded = true
       }
     })
