@@ -11,13 +11,25 @@ const getRandomArbitrary = (min: number, max: number) => {
 // 🛠 WIP 🛠: Get 10 random DB entries
 // This 10 entries are in row - so there will be the same products in a row
 const getProducts = async () => {
-  const productCount = await ProductModel.estimatedDocumentCount()
+  const products = await ProductModel.aggregate([
+    {
+      $sample: { size: 5 }
+    },
+    {
+      $project: {
+        _id: 0,
+        __v: 0
+      }
+    }
+  ])
 
-  const products = await ProductModel.find()
-    .skip(getRandomArbitrary(0, productCount - 2))
-    .limit(2)
+  const newProducts = products.map((product) => {
+    const newProduct = { ...product }
+    newProduct.creationDate = newProduct.creationDate.getTime()
+    return newProduct
+  })
 
-  return products
+  return newProducts
 }
 
 export class MyRoom extends Room {
