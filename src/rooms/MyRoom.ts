@@ -23,6 +23,7 @@ const getProducts = async () => {
     }
   ])
 
+  // TODO: There is a way to change this in the query, I just currently can't remember how 😶
   const newProducts = products.map((product) => {
     const newProduct = { ...product }
     newProduct.creationDate = newProduct.creationDate.getTime()
@@ -148,6 +149,7 @@ export class MyRoom extends Room {
     this.setSimulationInterval(() => {
       // Check if game has ended
       if (this.state.gameEnded) {
+        this.endRound(this.state.playerStates)
         this.endGame()
         return
       }
