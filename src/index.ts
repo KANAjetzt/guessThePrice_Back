@@ -11,7 +11,8 @@ import catchAsync from './utils/catchAsync'
 
 dotenv.config({ path: './config.env' })
 
-const port = Number(process.env.PORT || 2567)
+const port =
+  Number(process.env.PORT || 2567) + Number(process.env.NODE_APP_INSTANCE || 0)
 const app = express()
 
 const DB = process.env.DATABASE.replace(
@@ -33,7 +34,9 @@ app.use(cors())
 app.use(express.json())
 const server = http.createServer(app)
 const gameServer = new Server({
-  server
+  server,
+  express: app,
+  pingInterval: 0
 })
 
 // register your room handlers
@@ -50,5 +53,5 @@ gameServer.define('my_room', MyRoom)
 // register colyseus monitor AFTER registering your room handlers
 app.use('/colyseus', monitor())
 
-gameServer.listen(port, process.env.HOST)
+gameServer.listen(port)
 console.log(`Listening on ws://${process.env.HOST}:${port}`)
