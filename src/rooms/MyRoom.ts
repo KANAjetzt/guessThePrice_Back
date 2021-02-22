@@ -182,6 +182,14 @@ export class MyRoom extends Room {
         this.state.roundEnded = true
       }
     })
+
+    // Keep's the ws connection alive on heroku
+    // https://devcenter.heroku.com/articles/websockets#timeouts
+    this.onMessage('alivePing', (client, message) => {
+      this.clock.setTimeout(() => {
+        client.send('alivePong')
+      }, 1000 * 30)
+    })
   }
 
   onJoin(client: Client, options: any) {
