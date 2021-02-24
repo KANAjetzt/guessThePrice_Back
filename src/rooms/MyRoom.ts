@@ -79,6 +79,8 @@ export class MyRoom extends Room {
     // Reset round state
     this.state.roundEnded = false
     this.state.isRoundScoreCalculated = false
+    this.state.isBetweenRounds = false
+    this.state.isAllPlayerGuessed = false
 
     // Update currentRound state
     this.state.currentRound++
@@ -103,6 +105,14 @@ export class MyRoom extends Room {
         )
       })
       this.state.isRoundScoreCalculated = true
+    }
+
+    // Show round finish screen for 5 seconds
+    if (!this.state.isBetweenRounds) {
+      this.state.isBetweenRounds = true
+      this.clock.setTimeout(() => {
+        this.state.roundEnded = true
+      }, 5 * 1000)
     }
   }
 
@@ -153,13 +163,13 @@ export class MyRoom extends Room {
         this.endGame()
         return
       }
-
       if (this.state.roundEnded) {
+        this.startRound()
+      }
+
+      if (this.state.isAllPlayerGuessed && !this.state.isBetweenRounds) {
         // Check if round has ended
         this.endRound(this.state.playerStates)
-      }
-      if (this.state.isRoundScoreCalculated) {
-        this.startRound()
       }
     })
 
@@ -176,10 +186,10 @@ export class MyRoom extends Room {
         allPlayersGuessed &&
         this.state.currentRound === this.state.products.length - 1
       ) {
-        this.state.roundEnded = true
+        this.state.isAllPlayerGuessed = true
         this.state.gameEnded = true
       } else if (allPlayersGuessed) {
-        this.state.roundEnded = true
+        this.state.isAllPlayerGuessed = true
       }
     })
 
