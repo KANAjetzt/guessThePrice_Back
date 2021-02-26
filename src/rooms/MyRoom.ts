@@ -86,7 +86,10 @@ export class MyRoom extends Room {
     this.state.currentRound++
 
     // Reset player guessedPrice
-    this.state.playerStates.forEach((player: any) => (player.guessedPrice = 0))
+    this.state.playerStates.forEach((player: any) => {
+      player.guessedPrice = 0
+      player.roundScore = 0
+    })
 
     // Set new currentProduct
     this.state.currentProduct = this.getProduct(
@@ -99,15 +102,17 @@ export class MyRoom extends Room {
     // Calculate player scores
     if (!this.state.isRoundScoreCalculated) {
       players.forEach((player: any) => {
-        player.score += this.getScore(
+        player.roundScore = this.getScore(
           this.state.currentProduct.price,
           player.guessedPrice
         )
+        player.score += player.roundScore
       })
       this.state.isRoundScoreCalculated = true
     }
 
     // Show round finish screen for 5 seconds
+    // TODO: Game shoul'd be ended from here, after the 5 seconds round end state
     if (!this.state.isBetweenRounds) {
       this.state.isBetweenRounds = true
       this.clock.setTimeout(() => {
