@@ -13,18 +13,23 @@ export class PlayerState extends Schema {
   guessedPrice: number
 
   @type('number')
+  roundScore: number
+
+  @type('number')
   score: number
 
   constructor(
     id: string,
     name: string = generateName(),
     guessedPrice: number = 0,
+    roundScore: number = 0,
     score: number = 0
   ) {
     super()
     this.id = id
     this.name = name
     this.guessedPrice = guessedPrice
+    this.roundScore = roundScore
     this.score = score
   }
 }
@@ -42,10 +47,16 @@ export class GameState extends Schema {
   currentRound: number
 
   @type('boolean')
+  isAllPlayerGuessed: boolean
+
+  @type('boolean')
   isRoundScoreCalculated: boolean
 
   @type('boolean')
   roundEnded: boolean
+
+  @type('boolean')
+  isBetweenRounds: boolean
 
   @type('boolean')
   gameEnded: boolean
@@ -86,8 +97,10 @@ export class GameState extends Schema {
     ]
 
     this.currentRound = 0
+    this.isAllPlayerGuessed = false
     this.isRoundScoreCalculated = false
     this.roundEnded = false
+    this.isBetweenRounds = false
     this.gameEnded = false
     this.isGameEnded = false
   }

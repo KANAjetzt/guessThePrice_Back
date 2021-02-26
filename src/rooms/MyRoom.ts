@@ -79,12 +79,17 @@ export class MyRoom extends Room {
     // Reset round state
     this.state.roundEnded = false
     this.state.isRoundScoreCalculated = false
+    this.state.isBetweenRounds = false
+    this.state.isAllPlayerGuessed = false
 
     // Update currentRound state
     this.state.currentRound++
 
     // Reset player guessedPrice
-    this.state.playerStates.forEach((player: any) => (player.guessedPrice = 0))
+    this.state.playerStates.forEach((player: any) => {
+      player.guessedPrice = 0
+      player.roundScore = 0
+    })
 
     // Set new currentProduct
     this.state.currentProduct = this.getProduct(
@@ -97,12 +102,22 @@ export class MyRoom extends Room {
     // Calculate player scores
     if (!this.state.isRoundScoreCalculated) {
       players.forEach((player: any) => {
-        player.score += this.getScore(
+        player.roundScore = this.getScore(
           this.state.currentProduct.price,
           player.guessedPrice
         )
+        player.score += player.roundScore
       })
       this.state.isRoundScoreCalculated = true
+    }
+
+    // Show round finish screen for 5 seconds
+    // TODO: Game shoul'd be ended from here, after the 5 seconds round end state
+    if (!this.state.isBetweenRounds) {
+      this.state.isBetweenRounds = true
+      this.clock.setTimeout(() => {
+        this.state.roundEnded = true
+      }, 5 * 1000)
     }
   }
 
@@ -153,13 +168,13 @@ export class MyRoom extends Room {
         this.endGame()
         return
       }
-
       if (this.state.roundEnded) {
+        this.startRound()
+      }
+
+      if (this.state.isAllPlayerGuessed && !this.state.isBetweenRounds) {
         // Check if round has ended
         this.endRound(this.state.playerStates)
-      }
-      if (this.state.isRoundScoreCalculated) {
-        this.startRound()
       }
     })
 
@@ -176,10 +191,10 @@ export class MyRoom extends Room {
         allPlayersGuessed &&
         this.state.currentRound === this.state.products.length - 1
       ) {
-        this.state.roundEnded = true
+        this.state.isAllPlayerGuessed = true
         this.state.gameEnded = true
       } else if (allPlayersGuessed) {
-        this.state.roundEnded = true
+        this.state.isAllPlayerGuessed = true
       }
     })
 
