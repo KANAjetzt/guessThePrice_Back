@@ -59,6 +59,12 @@ export class GameState extends Schema {
   isBetweenRounds: boolean
 
   @type('boolean')
+  gameStarted: boolean
+
+  @type('boolean')
+  isGameStarted: boolean
+
+  @type('boolean')
   gameEnded: boolean
 
   @type('boolean')
@@ -101,6 +107,8 @@ export class GameState extends Schema {
     this.isRoundScoreCalculated = false
     this.roundEnded = false
     this.isBetweenRounds = false
+    this.gameStarted = false
+    this.isGameStarted = false
     this.gameEnded = false
     this.isGameEnded = false
   }

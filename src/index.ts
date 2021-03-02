@@ -7,7 +7,6 @@ import { Server, LobbyRoom } from 'colyseus'
 import { monitor } from '@colyseus/monitor'
 // import socialRoutes from "@colyseus/social/express"
 import { MyRoom } from './rooms/MyRoom'
-import { Lobby } from './rooms/Lobby'
 import catchAsync from './utils/catchAsync'
 
 dotenv.config({ path: './config.env' })
@@ -43,8 +42,6 @@ const gameServer = new Server({
 // register your room handlers
 gameServer.define('my_room', MyRoom)
 
-// Expose your game room with realtime listing enabled.
-gameServer.define('lobby', Lobby).enableRealtimeListing()
 /**
  * Register @colyseus/social routes
  *

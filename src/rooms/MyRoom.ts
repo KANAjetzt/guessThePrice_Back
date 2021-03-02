@@ -74,6 +74,36 @@ export class MyRoom extends Room {
     }
   }
 
+  startGame() {
+    // Load 10 products into products state
+    ;(async () => {
+      const products = (await getProducts()).map(
+        (product: any) =>
+          new Product(
+            (product as any).creationDate,
+            (product as any).link,
+            (product as any).searchterm,
+            (product as any).title,
+            (product as any).price,
+            (product as any).ratingStars,
+            (product as any).ratingCount,
+            (product as any).featureBullets,
+            (product as any).technicalDetails,
+            (product as any).description,
+            new Imgs(
+              (product as any).imgs[0].mediumImgs,
+              (product as any).imgs[0].largeImgs
+            )
+          )
+      )
+
+      this.state.products = products
+
+      // Grab one product and set it to currentProduct
+      this.state.currentProduct = this.state.products.$items.get(0)
+    })()
+  }
+
   // Start the round
   startRound() {
     // Reset round state
@@ -133,35 +163,14 @@ export class MyRoom extends Room {
     // Initialize GameState
     this.setState(new GameState())
 
-    // Load 10 products into products state
-    ;(async () => {
-      const products = (await getProducts()).map(
-        (product: any) =>
-          new Product(
-            (product as any).creationDate,
-            (product as any).link,
-            (product as any).searchterm,
-            (product as any).title,
-            (product as any).price,
-            (product as any).ratingStars,
-            (product as any).ratingCount,
-            (product as any).featureBullets,
-            (product as any).technicalDetails,
-            (product as any).description,
-            new Imgs(
-              (product as any).imgs[0].mediumImgs,
-              (product as any).imgs[0].largeImgs
-            )
-          )
-      )
-
-      this.state.products = products
-
-      // Grab one product and set it to currentProduct
-      this.state.currentProduct = this.state.products.$items.get(0)
-    })()
-
     this.setSimulationInterval(() => {
+      // Check if game has started
+      if (this.state.gameStarted && !this.state.isGameStarted) {
+        // Start the game
+        this.startGame()
+        this.state.isGameStarted = true
+      }
+
       // Check if game has ended
       if (this.state.gameEnded) {
         this.endRound(this.state.playerStates)
@@ -196,6 +205,11 @@ export class MyRoom extends Room {
       } else if (allPlayersGuessed) {
         this.state.isAllPlayerGuessed = true
       }
+    })
+
+    this.onMessage('startGame', (client, message) => {
+      // change state to game started
+      this.state.gameStarted = true
     })
 
     // Keep's the ws connection alive on heroku
