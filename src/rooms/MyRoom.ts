@@ -48,6 +48,13 @@ export class MyRoom extends Room {
     return products[currentRound]
   }
 
+  handleNameChange(client: any, newName: string, players: Array<PlayerState>) {
+    // Get the index of the player that guessed the price
+    const index = players.findIndex((e: any) => e.id === client.sessionId)
+
+    players[index].name = newName
+  }
+
   handlePlayerGuess(client: any, message: any, players: Array<PlayerState>) {
     console.log(client.sessionId, "sent 'action' message: ", message)
 
@@ -183,6 +190,15 @@ export class MyRoom extends Room {
       }
     })
 
+    this.onMessage('nameChange', (client, message) => {
+      this.handleNameChange(client, message.name, this.state.playerStates)
+    })
+
+    this.onMessage('startGame', (client, message) => {
+      // change state to game started
+      this.state.gameStarted = true
+    })
+
     this.onMessage('guessedPrice', (client, message) => {
       // Updates guessedPrice in player state
       // Returns true if all Players guessed a price
@@ -201,11 +217,6 @@ export class MyRoom extends Room {
       } else if (allPlayersGuessed) {
         this.state.isAllPlayerGuessed = true
       }
-    })
-
-    this.onMessage('startGame', (client, message) => {
-      // change state to game started
-      this.state.gameStarted = true
     })
 
     // Keep's the ws connection alive on heroku
