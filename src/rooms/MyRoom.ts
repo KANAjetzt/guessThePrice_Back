@@ -4,10 +4,6 @@ import { GameState, PlayerState } from './schema/GameState'
 import { getOne } from '../DB/controllers/factory'
 import ProductModel from '../DB/models/product'
 
-const getRandomArbitrary = (min: number, max: number) => {
-  return Math.floor(Math.random() * (max - min) + min)
-}
-
 // 🛠 WIP 🛠: Get 10 random DB entries
 // This 10 entries are in row - so there will be the same products in a row
 const getProducts = async () => {

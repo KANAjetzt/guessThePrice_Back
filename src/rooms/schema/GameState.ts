@@ -1,6 +1,7 @@
 import { Schema, MapSchema, ArraySchema, type } from '@colyseus/schema'
 import { Product, Products, Imgs } from './MyRoomState'
 import { generateName } from '../../utils/name'
+import { getAvatar } from '../../utils/getAvatar'
 
 export class PlayerState extends Schema {
   @type('string')
@@ -8,6 +9,9 @@ export class PlayerState extends Schema {
 
   @type('string')
   name: string
+
+  @type('string')
+  avatar: string
 
   @type('number')
   guessedPrice: number
@@ -21,6 +25,7 @@ export class PlayerState extends Schema {
   constructor(
     id: string,
     name: string = generateName(),
+    avatar: string = getAvatar(),
     guessedPrice: number = 0,
     roundScore: number = 0,
     score: number = 0
@@ -28,6 +33,7 @@ export class PlayerState extends Schema {
     super()
     this.id = id
     this.name = name
+    this.avatar = avatar
     this.guessedPrice = guessedPrice
     this.roundScore = roundScore
     this.score = score
