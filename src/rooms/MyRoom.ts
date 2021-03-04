@@ -1,6 +1,6 @@
 import { Room, Client } from 'colyseus'
 import { Product, Imgs, Products } from './schema/MyRoomState'
-import { GameState, PlayerState } from './schema/GameState'
+import { GameSettings, GameState, PlayerState } from './schema/GameState'
 import { getOne } from '../DB/controllers/factory'
 import ProductModel from '../DB/models/product'
 
@@ -53,6 +53,14 @@ export class MyRoom extends Room {
     const index = players.findIndex((e: any) => e.id === client.sessionId)
 
     players[index].name = newName
+  }
+
+  handleSettings(client: any, message: any, gameSettings: Array<GameSettings>) {
+    // Check what setting is changing
+    const settingName: any = Object.keys(message)[0]
+
+    // Change setting
+    gameSettings[settingName] = message[settingName]
   }
 
   handlePlayerGuess(client: any, message: any, players: Array<PlayerState>) {
@@ -192,6 +200,10 @@ export class MyRoom extends Room {
 
     this.onMessage('nameChange', (client, message) => {
       this.handleNameChange(client, message.name, this.state.playerStates)
+    })
+
+    this.onMessage('settings', (client, message) => {
+      this.handleSettings(client, message, this.state.gameSettings)
     })
 
     this.onMessage('startGame', (client, message) => {

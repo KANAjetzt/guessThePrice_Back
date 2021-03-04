@@ -39,7 +39,25 @@ export class PlayerState extends Schema {
     this.score = score
   }
 }
+
+export class GameSettings extends Schema {
+  @type('number')
+  rounds: number
+
+  @type('boolean')
+  showGuessedPrice: boolean
+
+  constructor(rounds: number = 5, showGuessedPrice: boolean = true) {
+    super()
+    this.rounds = rounds
+    this.showGuessedPrice = showGuessedPrice
+  }
+}
+
 export class GameState extends Schema {
+  @type(GameSettings)
+  gameSettings: GameSettings
+
   @type([PlayerState])
   playerStates: PlayerState[]
 
@@ -78,6 +96,7 @@ export class GameState extends Schema {
 
   constructor() {
     super()
+    this.gameSettings = new GameSettings()
     this.playerStates = new ArraySchema()
     this.currentProduct = new Product(
       0,
