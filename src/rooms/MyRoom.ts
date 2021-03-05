@@ -9,7 +9,7 @@ import ProductModel from '../DB/models/product'
 const getProducts = async (productCount: number) => {
   const products = await ProductModel.aggregate([
     {
-      $sample: { size: 1 }
+      $sample: { size: productCount }
     },
     {
       $project: {
