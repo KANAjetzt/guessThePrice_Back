@@ -6,10 +6,10 @@ import ProductModel from '../DB/models/product'
 
 // 🛠 WIP 🛠: Get 10 random DB entries
 // This 10 entries are in row - so there will be the same products in a row
-const getProducts = async () => {
+const getProducts = async (productCount: number) => {
   const products = await ProductModel.aggregate([
     {
-      $sample: { size: 5 }
+      $sample: { size: productCount }
     },
     {
       $project: {
@@ -85,10 +85,10 @@ export class MyRoom extends Room {
     }
   }
 
-  startGame() {
+  startGame(gameSettings: GameSettings) {
     // Load 10 products into products state
     ;(async () => {
-      const products = (await getProducts()).map(
+      const products = (await getProducts(gameSettings.rounds)).map(
         (product: any) =>
           new Product(
             (product as any).creationDate,
@@ -178,7 +178,7 @@ export class MyRoom extends Room {
       // Check if game has started
       if (this.state.gameStarted && !this.state.isGameStarted) {
         // Start the game
-        this.startGame()
+        this.startGame(this.state.gameSettings)
         this.state.isGameStarted = true
       }
 
