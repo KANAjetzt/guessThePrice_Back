@@ -22,13 +22,17 @@ export class PlayerState extends Schema {
   @type('number')
   score: number
 
+  @type('boolean')
+  winner: boolean
+
   constructor(
     id: string,
     name: string = generateName(),
     avatar: string = getAvatar(),
     guessedPrice: number = 0,
     roundScore: number = 0,
-    score: number = 0
+    score: number = 0,
+    winner: boolean = false
   ) {
     super()
     this.id = id
@@ -37,6 +41,7 @@ export class PlayerState extends Schema {
     this.guessedPrice = guessedPrice
     this.roundScore = roundScore
     this.score = score
+    this.winner = winner
   }
 }
 

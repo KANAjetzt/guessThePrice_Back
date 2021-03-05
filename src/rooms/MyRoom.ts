@@ -9,7 +9,7 @@ import ProductModel from '../DB/models/product'
 const getProducts = async (productCount: number) => {
   const products = await ProductModel.aggregate([
     {
-      $sample: { size: productCount }
+      $sample: { size: 1 }
     },
     {
       $project: {
@@ -162,10 +162,17 @@ export class MyRoom extends Room {
     }
   }
 
-  endGame() {
+  endGame(players: Array<PlayerState>) {
     // Show scoreboard
     if (!this.state.isGameEnded) {
       console.log('game has ended')
+      // Determine winner --> player with the highest score
+      const winner = players.reduce((prev: any, current: any) => {
+        return prev.score > current.score ? prev : current
+      }, 0)
+
+      winner.winner = true
+
       this.state.isGameEnded = true
     }
   }
@@ -185,7 +192,7 @@ export class MyRoom extends Room {
       // Check if game has ended
       if (this.state.gameEnded) {
         this.endRound(this.state.playerStates)
-        this.endGame()
+        this.endGame(this.state.playerStates)
         return
       }
       if (this.state.roundEnded) {
