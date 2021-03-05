@@ -3,7 +3,7 @@ import dotenv from 'dotenv'
 import express from 'express'
 import mongoose from 'mongoose'
 import cors from 'cors'
-import { Server } from 'colyseus'
+import { Server, LobbyRoom } from 'colyseus'
 import { monitor } from '@colyseus/monitor'
 // import socialRoutes from "@colyseus/social/express"
 import { MyRoom } from './rooms/MyRoom'

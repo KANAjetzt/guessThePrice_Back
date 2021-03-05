@@ -4,4 +4,7 @@
 // Default (format when you save)
 "editor.formatOnSave": true,
 "editor.defaultFormatter": "esbenp.prettier-vscode",
+"cSpell.words": [
+  "cloudinary"
+],
 }
