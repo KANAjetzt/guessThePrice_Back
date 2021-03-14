@@ -3,6 +3,7 @@ import { Product, Imgs, Products } from './schema/MyRoomState'
 import { GameSettings, GameState, PlayerState } from './schema/GameState'
 import { getOne } from '../DB/controllers/factory'
 import ProductModel from '../DB/models/product'
+import { getAvatar } from '../utils/getAvatar'
 
 // 🛠 WIP 🛠: Get 10 random DB entries
 // This 10 entries are in row - so there will be the same products in a row
@@ -49,10 +50,18 @@ export class MyRoom extends Room {
   }
 
   handleNameChange(client: any, newName: string, players: Array<PlayerState>) {
-    // Get the index of the player that guessed the price
+    // Get the index of the player
     const index = players.findIndex((e: any) => e.id === client.sessionId)
 
     players[index].name = newName
+  }
+
+  handleAvatarChange(client: any, players: Array<PlayerState>) {
+    // Get the index of the player
+    const index = players.findIndex((e: any) => e.id === client.sessionId)
+
+    // Get him a new random avatar
+    players[index].avatar = getAvatar()
   }
 
   handleSettings(client: any, message: any, gameSettings: Array<GameSettings>) {
@@ -167,6 +176,7 @@ export class MyRoom extends Room {
     if (!this.state.isGameEnded) {
       console.log('game has ended')
       // Determine winner --> player with the highest score
+      // TODO: Handle 2 Players with the same score
       const winner = players.reduce((prev: any, current: any) => {
         return prev.score > current.score ? prev : current
       }, 0)
@@ -207,6 +217,10 @@ export class MyRoom extends Room {
 
     this.onMessage('nameChange', (client, message) => {
       this.handleNameChange(client, message.name, this.state.playerStates)
+    })
+
+    this.onMessage('avatarChange', (client, message) => {
+      this.handleAvatarChange(client, this.state.playerStates)
     })
 
     this.onMessage('settings', (client, message) => {
