@@ -2,6 +2,7 @@ import { Schema, MapSchema, ArraySchema, type } from '@colyseus/schema'
 import { Product, Products, Imgs } from './MyRoomState'
 import { generateName } from '../../utils/name'
 import { getAvatar } from '../../utils/getAvatar'
+import { createDummies } from '../../utils/createDummies'
 
 export class PlayerState extends Schema {
   @type('string')
@@ -26,9 +27,9 @@ export class PlayerState extends Schema {
   winner: boolean
 
   constructor(
-    id: string,
-    name: string = generateName(),
-    avatar: string = getAvatar(),
+    id: string = 'dummy',
+    name: string = generateName(id),
+    avatar: string = getAvatar(id),
     guessedPrice: number = 0,
     roundScore: number = 0,
     score: number = 0,
@@ -49,12 +50,20 @@ export class GameSettings extends Schema {
   @type('number')
   rounds: number
 
+  @type('number')
+  maxPlayers: number
+
   @type('boolean')
   showGuessedPrice: boolean
 
-  constructor(rounds: number = 5, showGuessedPrice: boolean = true) {
+  constructor(
+    rounds: number = 5,
+    maxPlayers: number = 5,
+    showGuessedPrice: boolean = true
+  ) {
     super()
     this.rounds = rounds
+    this.maxPlayers = maxPlayers
     this.showGuessedPrice = showGuessedPrice
   }
 }
@@ -105,7 +114,7 @@ export class GameState extends Schema {
   constructor() {
     super()
     this.gameSettings = new GameSettings()
-    this.playerStates = new ArraySchema()
+    this.playerStates = createDummies(this.gameSettings.maxPlayers)
     this.currentProduct = new Product(
       0,
       'Loading Link',
@@ -136,7 +145,7 @@ export class GameState extends Schema {
     ]
 
     this.currentRound = 0
-    this.playerCount = [...this.playerStates].length
+    this.playerCount = 0
     this.isAllPlayerGuessed = false
     this.isRoundScoreCalculated = false
     this.roundEnded = false

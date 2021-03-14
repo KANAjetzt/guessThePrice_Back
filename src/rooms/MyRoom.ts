@@ -1,5 +1,5 @@
 import { Room, Client } from 'colyseus'
-import { Product, Imgs, Products } from './schema/MyRoomState'
+import { Product, Imgs, Products, Player } from './schema/MyRoomState'
 import { GameSettings, GameState, PlayerState } from './schema/GameState'
 import { getOne } from '../DB/controllers/factory'
 import ProductModel from '../DB/models/product'
@@ -61,14 +61,17 @@ export class MyRoom extends Room {
     const index = players.findIndex((e: any) => e.id === client.sessionId)
 
     // Get him a new random avatar
-    players[index].avatar = getAvatar()
+    players[index].avatar = getAvatar(players[index].id)
   }
 
   handleSettings(client: any, message: any, gameSettings: Array<GameSettings>) {
     // Check what setting is changing
     const settingName: any = Object.keys(message)[0]
 
+    // TODO: Add some validation?!
+
     // Change setting
+    // TODO: Handle maxPlayers change add/remove dummies from PlayerStates
     gameSettings[settingName] = message[settingName]
   }
 
@@ -262,10 +265,32 @@ export class MyRoom extends Room {
   }
 
   onJoin(client: Client, options: any) {
-    // Add new player to playerState
-    this.state.playerStates.push(new PlayerState(client.sessionId))
+    // Check if maxPlayer count is reached
+    if (this.state.gameSettings.maxPlayers === this.state.playerCount) {
+      // send error message --> maxPlayer count reached
+      client.send('error', {
+        type: 'critical',
+        message: 'Sorry - die maximale Anzahl an Spielern ist erreicht.'
+      })
+      return
+    }
+    // Find next dummy in playerStates
+    const index = this.state.playerStates.findIndex(
+      (player: any) => player.id === 'dummy'
+    )
+
+    // Replace dummy if there is one
+    if (index !== -1) {
+      this.state.playerStates[index] = new PlayerState(client.sessionId)
+    } else {
+      // Add new player to playerState
+      this.state.playerStates.push(new PlayerState(client.sessionId))
+    }
+
     // Update playerCount
-    this.state.playerCount = this.state.playerStates.length
+    this.state.playerCount = this.state.playerStates.filter(
+      (player: any) => player.id !== 'dummy'
+    ).length
   }
 
   onLeave(client: Client, consented: boolean) {
