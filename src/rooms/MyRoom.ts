@@ -264,9 +264,16 @@ export class MyRoom extends Room {
   onJoin(client: Client, options: any) {
     // Add new player to playerState
     this.state.playerStates.push(new PlayerState(client.sessionId))
+    // Update playerCount
+    this.state.playerCount = this.state.playerStates.length
   }
 
-  onLeave(client: Client, consented: boolean) {}
+  onLeave(client: Client, consented: boolean) {
+    // TODO: Remove player from playerState (? reconnect ?)
+
+    // Update playerCount
+    this.state.playerCount = this.state.playerStates.length
+  }
 
   onDispose() {}
 }

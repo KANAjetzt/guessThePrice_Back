@@ -75,6 +75,9 @@ export class GameState extends Schema {
   @type('number')
   currentRound: number
 
+  @type('number')
+  playerCount: number
+
   @type('boolean')
   isAllPlayerGuessed: boolean
 
@@ -133,6 +136,7 @@ export class GameState extends Schema {
     ]
 
     this.currentRound = 0
+    this.playerCount = [...this.playerStates].length
     this.isAllPlayerGuessed = false
     this.isRoundScoreCalculated = false
     this.roundEnded = false
