@@ -156,6 +156,11 @@ export class MyRoom extends Room {
   }
 
   startGame(gameSettings: GameSettings) {
+    // Remove all dummies from playerStores
+    this.state.playerStates = this.state.playerStates.filter(
+      (player: any) => player.id !== 'dummy'
+    )
+
     // Load 10 products into products state
     ;(async () => {
       const products = (await getProducts(gameSettings.rounds)).map(
