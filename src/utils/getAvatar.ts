@@ -34,6 +34,7 @@ const avatars = [
 ]
 
 export const getAvatar = (id: string) => {
-  if (id === 'dummy') return ''
+  if (id === 'dummy')
+    return 'https://res.cloudinary.com/kana/image/upload/f_auto,q_auto/v1616085103/guessThePrice/default_xmr80h.jpg'
   return avatars[getRandomNumber(0, avatars.length - 1)]
 }
