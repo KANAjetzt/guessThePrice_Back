@@ -1,9 +1,11 @@
 import { Room, Client } from 'colyseus'
+import { ArraySchema } from '@colyseus/schema'
 import { Product, Imgs, Products, Player } from './schema/MyRoomState'
 import { GameSettings, GameState, PlayerState } from './schema/GameState'
 import { getOne } from '../DB/controllers/factory'
 import ProductModel from '../DB/models/product'
 import { getAvatar } from '../utils/getAvatar'
+import { createDummies } from '../utils/createDummies'
 
 // 🛠 WIP 🛠: Get 10 random DB entries
 // This 10 entries are in row - so there will be the same products in a row
@@ -64,6 +66,52 @@ export class MyRoom extends Room {
     players[index].avatar = getAvatar(players[index].id)
   }
 
+  handleMaxPlayersChange(
+    client: any,
+    playerCount: number,
+    dummyCount: number,
+    maxPlayers: number
+  ) {
+    // Check if more players are connected then the maxPlayer setting should be
+    if (playerCount > maxPlayers) {
+      // send error message --> playerCount is higher then maxPlayers
+      client.send('error', {
+        type: 'critical',
+        message: 'Sorry - es sind schon mehr Spieler in der Lobby.'
+      })
+      return
+    }
+
+    // Calculate the amount of dummies to remove / add
+    const dummyValue = maxPlayers - playerCount - dummyCount
+
+    if (dummyValue > 0) {
+      // add dummies to the playerStates
+      for (let i = 0; i < dummyValue; i++) {
+        this.state.playerStates.push(new PlayerState())
+      }
+    } else if (dummyValue < 0) {
+      // remove dummies from the playerStates
+      let positiveDummyValue = dummyValue * -1
+
+      this.state.playerStates = this.state.playerStates.reduce(
+        (acc: any, curr: any) => {
+          if (curr.id === 'dummy' && positiveDummyValue > 0) {
+            positiveDummyValue--
+            return acc
+          } else {
+            acc.push(curr)
+            return acc
+          }
+        },
+        new ArraySchema()
+      )
+    } else {
+      // do nothing
+      return
+    }
+  }
+
   handleSettings(client: any, message: any, gameSettings: Array<GameSettings>) {
     // Check what setting is changing
     const settingName: any = Object.keys(message)[0]
@@ -71,8 +119,18 @@ export class MyRoom extends Room {
     // TODO: Add some validation?!
 
     // Change setting
-    // TODO: Handle maxPlayers change add/remove dummies from PlayerStates
     gameSettings[settingName] = message[settingName]
+
+    // Handle maxPlayers change add/remove dummies from PlayerStates
+    if (settingName === 'maxPlayers') {
+      this.handleMaxPlayersChange(
+        client,
+        this.state.playerCount,
+        this.state.playerStates.filter((player: any) => player.id === 'dummy')
+          .length,
+        this.state.gameSettings.maxPlayers
+      )
+    }
   }
 
   handlePlayerGuess(client: any, message: any, players: Array<PlayerState>) {
