@@ -1,52 +1,52 @@
-import { Schema, ArraySchema, MapSchema, type } from '@colyseus/schema';
+import { Schema, ArraySchema, MapSchema, type } from '@colyseus/schema'
 
 export class Imgs extends Schema {
   @type(['string'])
-  mediumImgs: string[];
+  mediumImgs: string[]
 
   @type(['string'])
-  largeImgs: string[];
+  largeImgs: string[]
 
   constructor(mediumImgs: string[] = [], largeImgs: string[] = []) {
-    super();
-    this.mediumImgs = mediumImgs;
-    this.largeImgs = largeImgs;
+    super()
+    this.mediumImgs = mediumImgs
+    this.largeImgs = largeImgs
   }
 }
 
 export class Product extends Schema {
   @type('number')
-  creationDate: number;
+  creationDate: number
 
   @type('string')
-  link: string;
+  link: string
 
   @type('string')
-  searchterm: string;
+  searchterm: string
 
   @type('string')
-  title: string;
+  title: string
 
   @type('number')
-  price: number;
+  price: number
 
   @type('string')
-  ratingStars: string;
+  ratingStars: string
 
   @type('number')
-  ratingCount: number;
+  ratingCount: number
 
   @type(['string'])
-  featureBullets: string[];
+  featureBullets: string[]
 
   @type({ map: 'string' })
-  technicalDetails: { map: 'string' };
+  technicalDetails: { map: 'string' }
 
   @type('string')
-  description: string;
+  description: string
 
   @type([Imgs])
-  imgs: Imgs;
+  imgs: Imgs
 
   constructor(
     creationDate: number = 0,
@@ -61,37 +61,27 @@ export class Product extends Schema {
     description: string = 'Loading Description',
     imgs: Imgs
   ) {
-    super();
-    this.creationDate = creationDate;
-    this.link = link;
-    this.searchterm = searchterm;
-    this.title = title;
-    this.price = price;
-    this.ratingStars = ratingStars;
-    this.ratingCount = ratingCount;
-    this.featureBullets = featureBullets;
-    this.technicalDetails = technicalDetails;
-    this.description = description;
-    this.imgs = imgs;
+    super()
+    this.creationDate = creationDate
+    this.link = link
+    this.searchterm = searchterm
+    this.title = title
+    this.price = price
+    this.ratingStars = ratingStars
+    this.ratingCount = ratingCount
+    this.featureBullets = featureBullets
+    this.technicalDetails = technicalDetails
+    this.description = description
+    this.imgs = imgs
   }
 }
 
 export class Products extends Schema {
   @type([Product])
-  products: [Product];
+  products: [Product]
 
   constructor(products: [Product]) {
-    super();
-    this.products = products;
-  }
-}
-
-export class Player extends Schema {
-  @type('number')
-  playerGuessedPrice: number;
-
-  constructor(playerGuessedPrice: number) {
-    super();
-    this.playerGuessedPrice = playerGuessedPrice;
+    super()
+    this.products = products
   }
 }
