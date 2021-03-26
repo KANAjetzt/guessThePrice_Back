@@ -1,8 +1,11 @@
 import { Room, Client } from 'colyseus'
+import { ArraySchema } from '@colyseus/schema'
 import { Product, Imgs, Products } from './schema/MyRoomState'
 import { GameSettings, GameState, PlayerState } from './schema/GameState'
 import { getOne } from '../DB/controllers/factory'
 import ProductModel from '../DB/models/product'
+import { getAvatar } from '../utils/getAvatar'
+import { createDummies } from '../utils/createDummies'
 
 // 🛠 WIP 🛠: Get 10 random DB entries
 // This 10 entries are in row - so there will be the same products in a row
@@ -43,24 +46,103 @@ export class MyRoom extends Room {
     return Math.floor((100 - percentage) * 10)
   }
 
+  getAvgPrecision = (roundScores: [number]) => {
+    // Convert roundScores into percentages
+    const percentages = roundScores.map((score) => score / 1000)
+
+    const avgPrecision =
+      percentages.reduce((prev: any, current: any) => {
+        return prev + current
+      }, 0) / percentages.length
+
+    return parseFloat(avgPrecision.toFixed(2))
+  }
+
   // Get product from products state
   getProduct(products: Array<Product>, currentRound: number) {
     return products[currentRound]
   }
 
   handleNameChange(client: any, newName: string, players: Array<PlayerState>) {
-    // Get the index of the player that guessed the price
+    // Get the index of the player
     const index = players.findIndex((e: any) => e.id === client.sessionId)
 
     players[index].name = newName
+  }
+
+  handleAvatarChange(client: any, players: Array<PlayerState>) {
+    // Get the index of the player
+    const index = players.findIndex((e: any) => e.id === client.sessionId)
+
+    // Get him a new random avatar
+    players[index].avatar = getAvatar(players[index].id)
+  }
+
+  handleMaxPlayersChange(
+    client: any,
+    playerCount: number,
+    dummyCount: number,
+    maxPlayers: number
+  ) {
+    // Check if more players are connected then the maxPlayer setting should be
+    if (playerCount > maxPlayers) {
+      // send error message --> playerCount is higher then maxPlayers
+      client.send('error', {
+        type: 'critical',
+        message: 'Sorry - es sind schon mehr Spieler in der Lobby.'
+      })
+      return
+    }
+
+    // Calculate the amount of dummies to remove / add
+    const dummyValue = maxPlayers - playerCount - dummyCount
+
+    if (dummyValue > 0) {
+      // add dummies to the playerStates
+      for (let i = 0; i < dummyValue; i++) {
+        this.state.playerStates.push(new PlayerState())
+      }
+    } else if (dummyValue < 0) {
+      // remove dummies from the playerStates
+      let positiveDummyValue = dummyValue * -1
+
+      this.state.playerStates = this.state.playerStates.reduce(
+        (acc: any, curr: any) => {
+          if (curr.id === 'dummy' && positiveDummyValue > 0) {
+            positiveDummyValue--
+            return acc
+          } else {
+            acc.push(curr)
+            return acc
+          }
+        },
+        new ArraySchema()
+      )
+    } else {
+      // do nothing
+      return
+    }
   }
 
   handleSettings(client: any, message: any, gameSettings: Array<GameSettings>) {
     // Check what setting is changing
     const settingName: any = Object.keys(message)[0]
 
+    // TODO: Add some validation?!
+
     // Change setting
     gameSettings[settingName] = message[settingName]
+
+    // Handle maxPlayers change add/remove dummies from PlayerStates
+    if (settingName === 'maxPlayers') {
+      this.handleMaxPlayersChange(
+        client,
+        this.state.playerCount,
+        this.state.playerStates.filter((player: any) => player.id === 'dummy')
+          .length,
+        this.state.gameSettings.maxPlayers
+      )
+    }
   }
 
   handlePlayerGuess(client: any, message: any, players: Array<PlayerState>) {
@@ -86,7 +168,11 @@ export class MyRoom extends Room {
   }
 
   startGame(gameSettings: GameSettings) {
-    // Load 10 products into products state
+    // Remove all dummies from playerStores
+
+    this.state.playerStates = this.state.playerStates.filter(
+      (player: any) => player.id !== 'dummy'
+    ) // Load 10 products into products state
     ;(async () => {
       const products = (await getProducts(gameSettings.rounds)).map(
         (product: any) =>
@@ -112,7 +198,22 @@ export class MyRoom extends Room {
 
       // Grab one product and set it to currentProduct
       this.state.currentProduct = this.state.products.$items.get(0)
+
+      this.state.isProductsLoaded = true
+      this.state.isGameRestarted = false
     })()
+  }
+
+  restartGame() {
+    const savedPlayerStates = this.state.playerStates.map(
+      (player: PlayerState) => {
+        return new PlayerState(player.id, player.name, player.avatar)
+      }
+    )
+
+    this.setState(new GameState(this.state.gameSettings, savedPlayerStates))
+
+    this.state.isGameRestarted = true
   }
 
   // Start the round
@@ -147,6 +248,7 @@ export class MyRoom extends Room {
           this.state.currentProduct.price,
           player.guessedPrice
         )
+        player.roundScores.push(player.roundScore)
         player.score += player.roundScore
       })
       this.state.isRoundScoreCalculated = true
@@ -164,17 +266,18 @@ export class MyRoom extends Room {
 
   endGame(players: Array<PlayerState>) {
     // Show scoreboard
-    if (!this.state.isGameEnded) {
-      console.log('game has ended')
-      // Determine winner --> player with the highest score
-      const winner = players.reduce((prev: any, current: any) => {
-        return prev.score > current.score ? prev : current
-      }, 0)
 
-      winner.winner = true
+    console.log('game has ended')
+    // Determine winner --> player with the highest score
+    // TODO: Handle 2 Players with the same score
+    const winner = players.reduce((prev: any, current: any) => {
+      return prev.score > current.score ? prev : current
+    }, 0)
 
-      this.state.isGameEnded = true
-    }
+    winner.winner = true
+
+    // Calculate avgPrecision of winner
+    winner.avgPrecision = this.getAvgPrecision(winner.roundScores)
   }
 
   onCreate(options: any) {
@@ -184,16 +287,16 @@ export class MyRoom extends Room {
     this.setSimulationInterval(() => {
       // Check if game has started
       if (this.state.gameStarted && !this.state.isGameStarted) {
+        this.state.isGameStarted = true
         // Start the game
         this.startGame(this.state.gameSettings)
-        this.state.isGameStarted = true
       }
 
       // Check if game has ended
-      if (this.state.gameEnded) {
+      if (this.state.gameEnded && !this.state.isGameEnded) {
+        this.state.isGameEnded = true
         this.endRound(this.state.playerStates)
         this.endGame(this.state.playerStates)
-        return
       }
       if (this.state.roundEnded) {
         this.startRound()
@@ -209,6 +312,10 @@ export class MyRoom extends Room {
       this.handleNameChange(client, message.name, this.state.playerStates)
     })
 
+    this.onMessage('avatarChange', (client, message) => {
+      this.handleAvatarChange(client, this.state.playerStates)
+    })
+
     this.onMessage('settings', (client, message) => {
       this.handleSettings(client, message, this.state.gameSettings)
     })
@@ -216,6 +323,11 @@ export class MyRoom extends Room {
     this.onMessage('startGame', (client, message) => {
       // change state to game started
       this.state.gameStarted = true
+    })
+
+    this.onMessage('restartGame', (client, message) => {
+      console.log('restart Game!')
+      this.restartGame()
     })
 
     this.onMessage('guessedPrice', (client, message) => {
@@ -248,11 +360,40 @@ export class MyRoom extends Room {
   }
 
   onJoin(client: Client, options: any) {
-    // Add new player to playerState
-    this.state.playerStates.push(new PlayerState(client.sessionId))
+    // Check if maxPlayer count is reached
+    if (this.state.gameSettings.maxPlayers === this.state.playerCount) {
+      // send error message --> maxPlayer count reached
+      client.send('error', {
+        type: 'critical',
+        message: 'Sorry - die maximale Anzahl an Spielern ist erreicht.'
+      })
+      return
+    }
+    // Find next dummy in playerStates
+    const index = this.state.playerStates.findIndex(
+      (player: any) => player.id === 'dummy'
+    )
+
+    // Replace dummy if there is one
+    if (index !== -1) {
+      this.state.playerStates[index] = new PlayerState(client.sessionId)
+    } else {
+      // Add new player to playerState
+      this.state.playerStates.push(new PlayerState(client.sessionId))
+    }
+
+    // Update playerCount
+    this.state.playerCount = this.state.playerStates.filter(
+      (player: any) => player.id !== 'dummy'
+    ).length
   }
 
-  onLeave(client: Client, consented: boolean) {}
+  onLeave(client: Client, consented: boolean) {
+    // TODO: Remove player from playerState (? reconnect ?)
+
+    // Update playerCount
+    this.state.playerCount = this.state.playerStates.length
+  }
 
   onDispose() {}
 }
