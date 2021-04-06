@@ -67,9 +67,9 @@ export class GameSettings extends Schema {
   showGuessedPrice: boolean
 
   constructor(
-    rounds: number = 1,
+    rounds: number = 5,
     maxPlayers: number = 5,
-    showGuessedPrice: boolean = true
+    showGuessedPrice: boolean = false
   ) {
     super()
     this.rounds = rounds
