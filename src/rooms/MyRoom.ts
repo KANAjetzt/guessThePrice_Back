@@ -172,7 +172,9 @@ export class MyRoom extends Room {
 
     this.state.playerStates = this.state.playerStates.filter(
       (player: any) => player.id !== 'dummy'
-    ) // Load 10 products into products state
+    )
+
+    // Load 10 products into products state
     ;(async () => {
       const products = (await getProducts(gameSettings.rounds)).map(
         (product: any) =>
@@ -200,6 +202,16 @@ export class MyRoom extends Room {
       this.state.currentProduct = this.state.products.$items.get(0)
 
       this.state.isProductsLoaded = true
+
+      // Update betweenRoundsTime based on playerCount
+      if (this.state.playerCount >= 2 && this.state.playerCount <= 4) {
+        this.state.gameSettings.betweenRoundsTime = 10
+      } else if (this.state.playerCount >= 5 && this.state.playerCount <= 9) {
+        this.state.gameSettings.betweenRoundsTime = 15
+      } else if (this.state.playerCount >= 10) {
+        this.state.gameSettings.betweenRoundsTime = 20
+      }
+      // Reset game restart value ( used to set currentRoom on frontend )
       this.state.isGameRestarted = false
     })()
   }
@@ -213,6 +225,7 @@ export class MyRoom extends Room {
 
     this.setState(new GameState(this.state.gameSettings, savedPlayerStates))
 
+    // Used to set currentRoom on frontend
     this.state.isGameRestarted = true
   }
 
@@ -260,7 +273,7 @@ export class MyRoom extends Room {
       this.state.isBetweenRounds = true
       this.clock.setTimeout(() => {
         this.state.roundEnded = true
-      }, 5 * 1000)
+      }, this.state.gameSettings.betweenRoundsTime * 1000)
     }
   }
 

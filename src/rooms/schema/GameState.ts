@@ -63,17 +63,22 @@ export class GameSettings extends Schema {
   @type('number')
   maxPlayers: number
 
+  @type('number')
+  betweenRoundsTime: number
+
   @type('boolean')
   showGuessedPrice: boolean
 
   constructor(
     rounds: number = 5,
     maxPlayers: number = 5,
+    betweenRoundsTime: number = 5,
     showGuessedPrice: boolean = false
   ) {
     super()
     this.rounds = rounds
     this.maxPlayers = maxPlayers
+    this.betweenRoundsTime = betweenRoundsTime
     this.showGuessedPrice = showGuessedPrice
   }
 }
