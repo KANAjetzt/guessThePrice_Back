@@ -401,11 +401,31 @@ export class MyRoom extends Room {
     ).length
   }
 
-  onLeave(client: Client, consented: boolean) {
-    // TODO: Remove player from playerState (? reconnect ?)
+  async onLeave(client: Client, consented: boolean) {
+    const playerIndex = this.state.playerStates.findIndex(
+      (player: PlayerState) => player.id === client.sessionId
+    )
 
-    // Update playerCount
-    this.state.playerCount = this.state.playerStates.length
+    // flag client as inactive for other users
+    this.state.playerStates[playerIndex].connected = false
+
+    try {
+      if (consented) {
+        throw new Error('consented leave')
+      }
+
+      // allow disconnected client to reconnect into this room until 120 seconds
+      await this.allowReconnection(client, 120)
+
+      // client returned! let's re-activate it.
+      this.state.playerStates[playerIndex].connected = true
+    } catch (e) {
+      // 120 seconds expired. let's remove the client.
+      delete this.state.playerStates[playerIndex]
+
+      // Update playerCount
+      this.state.playerCount = this.state.playerStates.length
+    }
   }
 
   onDispose() {}
