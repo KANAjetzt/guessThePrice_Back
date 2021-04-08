@@ -33,6 +33,9 @@ export class PlayerState extends Schema {
   connected: boolean
 
   @type('boolean')
+  admin: boolean
+
+  @type('boolean')
   winner: boolean
 
   constructor(
@@ -45,6 +48,7 @@ export class PlayerState extends Schema {
     avgPrecision: number = 0,
     score: number = 0,
     connected: boolean = true,
+    admin: boolean = false,
     winner: boolean = false
   ) {
     super()
@@ -57,6 +61,7 @@ export class PlayerState extends Schema {
     this.avgPrecision = avgPrecision
     this.score = score
     this.connected = connected
+    this.admin = admin
     this.winner = winner
   }
 }

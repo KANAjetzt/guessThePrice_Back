@@ -33,6 +33,14 @@ const getProducts = async (productCount: number) => {
 }
 
 export class MyRoom extends Room {
+  isAdmin = (id: string) => {
+    const player = this.state.playerStates.filter(
+      (player: PlayerState) => player.id === id
+    )
+
+    return player.admin
+  }
+
   // Calculate player score
   getScore = (productPrice = 0, playerGuessedPrice = 0) => {
     let difference = productPrice - playerGuessedPrice
@@ -169,7 +177,6 @@ export class MyRoom extends Room {
 
   startGame(gameSettings: GameSettings) {
     // Remove all dummies from playerStores
-
     this.state.playerStates = this.state.playerStates.filter(
       (player: any) => player.id !== 'dummy'
     )
@@ -330,15 +337,48 @@ export class MyRoom extends Room {
     })
 
     this.onMessage('settings', (client, message) => {
+      // Check if admin
+      if (this.isAdmin(client.sessionId)) {
+        // If no admin send error and return
+        // send error message --> no admin rights
+        client.send('error', {
+          type: 'critical',
+          message: 'Sorry - nur der Lobby Leiter kann die Einstellungen ändern.'
+        })
+        return
+      }
+
       this.handleSettings(client, message, this.state.gameSettings)
     })
 
     this.onMessage('startGame', (client, message) => {
+      // Check if admin
+      if (this.isAdmin(client.sessionId)) {
+        // If no admin send error and return
+        // send error message --> no admin rights
+        client.send('error', {
+          type: 'critical',
+          message: 'Sorry - nur der Lobby Leiter kann das Spiel starten.'
+        })
+        return
+      }
+
       // change state to game started
       this.state.gameStarted = true
     })
 
     this.onMessage('restartGame', (client, message) => {
+      // Check if admin
+      if (this.isAdmin(client.sessionId)) {
+        // If no admin send error and return
+        // send error message --> no admin rights
+        client.send('error', {
+          type: 'critical',
+          message: 'Sorry - nur der Lobby Leiter kann das Spiel neustarten.'
+        })
+        return
+      }
+
       console.log('restart Game!')
       this.restartGame()
     })
@@ -396,9 +436,15 @@ export class MyRoom extends Room {
     }
 
     // Update playerCount
-    this.state.playerCount = this.state.playerStates.filter(
+    const allPlayers = this.state.playerStates.filter(
       (player: any) => player.id !== 'dummy'
-    ).length
+    )
+    this.state.playerCount = allPlayers.length
+
+    // Check if admin (first player)
+    if (this.state.playerCount === 1) {
+      this.state.playerStates[0].admin = true
+    }
   }
 
   async onLeave(client: Client, consented: boolean) {
@@ -420,6 +466,11 @@ export class MyRoom extends Room {
       // client returned! let's re-activate it.
       this.state.playerStates[playerIndex].connected = true
     } catch (e) {
+      // if disconnected player was admin promote other player
+      if (this.state.playerStates[playerIndex].admin) {
+        this.state.playerStates[0].admin = true
+      }
+
       // 120 seconds expired. let's remove the client.
       delete this.state.playerStates[playerIndex]
 
