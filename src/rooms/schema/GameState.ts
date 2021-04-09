@@ -30,6 +30,12 @@ export class PlayerState extends Schema {
   score: number
 
   @type('boolean')
+  connected: boolean
+
+  @type('boolean')
+  admin: boolean
+
+  @type('boolean')
   winner: boolean
 
   constructor(
@@ -41,6 +47,8 @@ export class PlayerState extends Schema {
     roundScores: number[] = new ArraySchema(),
     avgPrecision: number = 0,
     score: number = 0,
+    connected: boolean = true,
+    admin: boolean = false,
     winner: boolean = false
   ) {
     super()
@@ -52,6 +60,8 @@ export class PlayerState extends Schema {
     this.roundScores = roundScores
     this.avgPrecision = avgPrecision
     this.score = score
+    this.connected = connected
+    this.admin = admin
     this.winner = winner
   }
 }
@@ -63,17 +73,22 @@ export class GameSettings extends Schema {
   @type('number')
   maxPlayers: number
 
+  @type('number')
+  betweenRoundsTime: number
+
   @type('boolean')
   showGuessedPrice: boolean
 
   constructor(
-    rounds: number = 1,
+    rounds: number = 5,
     maxPlayers: number = 5,
-    showGuessedPrice: boolean = true
+    betweenRoundsTime: number = 5,
+    showGuessedPrice: boolean = false
   ) {
     super()
     this.rounds = rounds
     this.maxPlayers = maxPlayers
+    this.betweenRoundsTime = betweenRoundsTime
     this.showGuessedPrice = showGuessedPrice
   }
 }

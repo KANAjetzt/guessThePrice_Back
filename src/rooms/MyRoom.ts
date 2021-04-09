@@ -33,6 +33,14 @@ const getProducts = async (productCount: number) => {
 }
 
 export class MyRoom extends Room {
+  isAdmin = (id: string) => {
+    const player = this.state.playerStates.filter(
+      (player: PlayerState) => player.id === id
+    )
+
+    return player.admin
+  }
+
   // Calculate player score
   getScore = (productPrice = 0, playerGuessedPrice = 0) => {
     let difference = productPrice - playerGuessedPrice
@@ -169,10 +177,11 @@ export class MyRoom extends Room {
 
   startGame(gameSettings: GameSettings) {
     // Remove all dummies from playerStores
-
     this.state.playerStates = this.state.playerStates.filter(
       (player: any) => player.id !== 'dummy'
-    ) // Load 10 products into products state
+    )
+
+    // Load 10 products into products state
     ;(async () => {
       const products = (await getProducts(gameSettings.rounds)).map(
         (product: any) =>
@@ -200,6 +209,16 @@ export class MyRoom extends Room {
       this.state.currentProduct = this.state.products.$items.get(0)
 
       this.state.isProductsLoaded = true
+
+      // Update betweenRoundsTime based on playerCount
+      if (this.state.playerCount >= 2 && this.state.playerCount <= 4) {
+        this.state.gameSettings.betweenRoundsTime = 10
+      } else if (this.state.playerCount >= 5 && this.state.playerCount <= 9) {
+        this.state.gameSettings.betweenRoundsTime = 15
+      } else if (this.state.playerCount >= 10) {
+        this.state.gameSettings.betweenRoundsTime = 20
+      }
+      // Reset game restart value ( used to set currentRoom on frontend )
       this.state.isGameRestarted = false
     })()
   }
@@ -213,6 +232,7 @@ export class MyRoom extends Room {
 
     this.setState(new GameState(this.state.gameSettings, savedPlayerStates))
 
+    // Used to set currentRoom on frontend
     this.state.isGameRestarted = true
   }
 
@@ -260,7 +280,7 @@ export class MyRoom extends Room {
       this.state.isBetweenRounds = true
       this.clock.setTimeout(() => {
         this.state.roundEnded = true
-      }, 5 * 1000)
+      }, this.state.gameSettings.betweenRoundsTime * 1000)
     }
   }
 
@@ -317,15 +337,48 @@ export class MyRoom extends Room {
     })
 
     this.onMessage('settings', (client, message) => {
+      // Check if admin
+      if (this.isAdmin(client.sessionId)) {
+        // If no admin send error and return
+        // send error message --> no admin rights
+        client.send('error', {
+          type: 'critical',
+          message: 'Sorry - nur der Lobby Leiter kann die Einstellungen ändern.'
+        })
+        return
+      }
+
       this.handleSettings(client, message, this.state.gameSettings)
     })
 
     this.onMessage('startGame', (client, message) => {
+      // Check if admin
+      if (this.isAdmin(client.sessionId)) {
+        // If no admin send error and return
+        // send error message --> no admin rights
+        client.send('error', {
+          type: 'critical',
+          message: 'Sorry - nur der Lobby Leiter kann das Spiel starten.'
+        })
+        return
+      }
+
       // change state to game started
       this.state.gameStarted = true
     })
 
     this.onMessage('restartGame', (client, message) => {
+      // Check if admin
+      if (this.isAdmin(client.sessionId)) {
+        // If no admin send error and return
+        // send error message --> no admin rights
+        client.send('error', {
+          type: 'critical',
+          message: 'Sorry - nur der Lobby Leiter kann das Spiel neustarten.'
+        })
+        return
+      }
+
       console.log('restart Game!')
       this.restartGame()
     })
@@ -383,16 +436,47 @@ export class MyRoom extends Room {
     }
 
     // Update playerCount
-    this.state.playerCount = this.state.playerStates.filter(
+    const allPlayers = this.state.playerStates.filter(
       (player: any) => player.id !== 'dummy'
-    ).length
+    )
+    this.state.playerCount = allPlayers.length
+
+    // Check if admin (first player)
+    if (this.state.playerCount === 1) {
+      this.state.playerStates[0].admin = true
+    }
   }
 
-  onLeave(client: Client, consented: boolean) {
-    // TODO: Remove player from playerState (? reconnect ?)
+  async onLeave(client: Client, consented: boolean) {
+    const playerIndex = this.state.playerStates.findIndex(
+      (player: PlayerState) => player.id === client.sessionId
+    )
 
-    // Update playerCount
-    this.state.playerCount = this.state.playerStates.length
+    // flag client as inactive for other users
+    this.state.playerStates[playerIndex].connected = false
+
+    try {
+      if (consented) {
+        throw new Error('consented leave')
+      }
+
+      // allow disconnected client to reconnect into this room until 120 seconds
+      await this.allowReconnection(client, 120)
+
+      // client returned! let's re-activate it.
+      this.state.playerStates[playerIndex].connected = true
+    } catch (e) {
+      // if disconnected player was admin promote other player
+      if (this.state.playerStates[playerIndex].admin) {
+        this.state.playerStates[0].admin = true
+      }
+
+      // 120 seconds expired. let's remove the client.
+      delete this.state.playerStates[playerIndex]
+
+      // Update playerCount
+      this.state.playerCount = this.state.playerStates.length
+    }
   }
 
   onDispose() {}
