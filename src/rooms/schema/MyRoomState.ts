@@ -53,12 +53,12 @@ export class Product extends Schema {
     link: string = 'Loading Link',
     searchterm: string = 'Loading Searchterm',
     title: string = 'Loading Title',
-    price: number = 1000,
-    ratingStars: string = 'Loading Star Rating',
+    price: number = 0,
+    ratingStars: string = undefined,
     ratingCount: number = 0,
-    featureBullets: string[] = [],
-    technicalDetails: { map: 'string' },
-    description: string = 'Loading Description',
+    featureBullets: string[] = undefined,
+    technicalDetails: { map: 'string' } = undefined,
+    description: string = undefined,
     imgs: Imgs
   ) {
     super()
