@@ -306,11 +306,18 @@ export class MyRoom extends Room {
       this.state.gameState.isRoundScoreCalculated = true
     }
 
-    // Show round finish screen for 5 seconds
-    // TODO: Game shoul'd be ended from here, after the 5 seconds round end state
+    // Show round finish screen
     if (!this.state.gameState.isBetweenRounds) {
       this.state.gameState.isBetweenRounds = true
       this.clock.setTimeout(() => {
+        // Check if game is over
+        // currentRound is 0 based!
+        if (
+          this.state.gameState.currentRound + 1 ===
+          this.state.gameState.gameSettings.rounds
+        ) {
+          this.state.gameState.gameEnded = true
+        }
         this.state.gameState.roundEnded = true
       }, this.state.gameState.gameSettings.betweenRoundsTime * 1000)
     }
@@ -433,15 +440,8 @@ export class MyRoom extends Room {
         message,
         this.state.gameState.playerStates
       )
-      // If all players guessed a price end the round or game
-      if (
-        allPlayersGuessed &&
-        this.state.gameState.currentRound ===
-          this.state.gameState.products.length - 1
-      ) {
-        this.state.gameState.isAllPlayerGuessed = true
-        this.state.gameState.gameEnded = true
-      } else if (allPlayersGuessed) {
+      // If all players guessed a price end the round
+      if (allPlayersGuessed) {
         this.state.gameState.isAllPlayerGuessed = true
       }
     })
