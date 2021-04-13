@@ -80,7 +80,7 @@ export class GameSettings extends Schema {
   showGuessedPrice: boolean
 
   constructor(
-    rounds: number = 5,
+    rounds: number = 1,
     maxPlayers: number = 5,
     betweenRoundsTime: number = 5,
     showGuessedPrice: boolean = false
@@ -190,5 +190,15 @@ export class GameState extends Schema {
     this.isProductsLoaded = false
     this.gameEnded = false
     this.isGameEnded = false
+  }
+}
+
+export class MainState extends Schema {
+  @type(GameState)
+  gameState: GameState
+
+  constructor(gameState: GameState = new GameState()) {
+    super()
+    this.gameState = gameState
   }
 }
