@@ -80,7 +80,7 @@ export class GameSettings extends Schema {
   showGuessedPrice: boolean
 
   constructor(
-    rounds: number = 1,
+    rounds: number = 5,
     maxPlayers: number = 5,
     betweenRoundsTime: number = 5,
     showGuessedPrice: boolean = false
@@ -111,6 +111,9 @@ export class GameState extends Schema {
 
   @type('number')
   playerCount: number
+
+  @type('boolean')
+  allPlayerGuessed: boolean
 
   @type('boolean')
   isAllPlayerGuessed: boolean
@@ -180,6 +183,7 @@ export class GameState extends Schema {
 
     this.currentRound = 0
     this.playerCount = 0
+    this.allPlayerGuessed = false
     this.isAllPlayerGuessed = false
     this.isRoundScoreCalculated = false
     this.roundEnded = false

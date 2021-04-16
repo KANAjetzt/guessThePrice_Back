@@ -274,6 +274,7 @@ export class MyRoom extends Room {
     this.state.gameState.roundEnded = false
     this.state.gameState.isRoundScoreCalculated = false
     this.state.gameState.isBetweenRounds = false
+    this.state.gameState.allPlayerGuessed = false
     this.state.gameState.isAllPlayerGuessed = false
 
     // Update currentRound state
@@ -440,9 +441,12 @@ export class MyRoom extends Room {
         message,
         this.state.gameState.playerStates
       )
-      // If all players guessed a price end the round
+      // If all players guessed a price end the round in 5 seconds
       if (allPlayersGuessed) {
-        this.state.gameState.isAllPlayerGuessed = true
+        this.state.gameState.allPlayerGuessed = true
+        this.clock.setTimeout(() => {
+          this.state.gameState.isAllPlayerGuessed = true
+        }, 5 * 1000)
       }
     })
 
