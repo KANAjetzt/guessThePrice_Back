@@ -113,6 +113,9 @@ export class GameState extends Schema {
   playerCount: number
 
   @type('boolean')
+  allPlayerGuessed: boolean
+
+  @type('boolean')
   isAllPlayerGuessed: boolean
 
   @type('boolean')
@@ -180,6 +183,7 @@ export class GameState extends Schema {
 
     this.currentRound = 0
     this.playerCount = 0
+    this.allPlayerGuessed = false
     this.isAllPlayerGuessed = false
     this.isRoundScoreCalculated = false
     this.roundEnded = false
@@ -190,5 +194,15 @@ export class GameState extends Schema {
     this.isProductsLoaded = false
     this.gameEnded = false
     this.isGameEnded = false
+  }
+}
+
+export class MainState extends Schema {
+  @type(GameState)
+  gameState: GameState
+
+  constructor(gameState: GameState = new GameState()) {
+    super()
+    this.gameState = gameState
   }
 }
