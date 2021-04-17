@@ -11,6 +11,7 @@ import { getOne } from '../DB/controllers/factory'
 import ProductModel from '../DB/models/product'
 import { getAvatar } from '../utils/getAvatar'
 import { createDummies } from '../utils/createDummies'
+import { getName } from '../utils/nameDE'
 
 // 🛠 WIP 🛠: Get 10 random DB entries
 // This 10 entries are in row - so there will be the same products in a row
@@ -74,6 +75,14 @@ export class MyRoom extends Room {
   // Get product from products state
   getProduct(products: Array<Product>, currentRound: number) {
     return products[currentRound]
+  }
+
+  handleRandomNameChange(client: any, players: Array<PlayerState>) {
+    // Get the index of the player
+    const index = players.findIndex((e: any) => e.id === client.sessionId)
+
+    // New random player name
+    players[index].name = getName(client.sessionId)
   }
 
   handleNameChange(client: any, newName: string, players: Array<PlayerState>) {
@@ -372,6 +381,10 @@ export class MyRoom extends Room {
         // Check if round has ended
         this.endRound(this.state.gameState.playerStates)
       }
+    })
+
+    this.onMessage('randomNameChange', (client, message) => {
+      this.handleRandomNameChange(client, this.state.gameState.playerStates)
     })
 
     this.onMessage('nameChange', (client, message) => {
