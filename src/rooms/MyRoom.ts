@@ -270,7 +270,8 @@ export class MyRoom extends Room {
 
     this.state.gameState = new GameState(
       this.state.gameState.gameSettings,
-      savedPlayerStates
+      savedPlayerStates,
+      this.state.gameState.playerCount
     )
 
     // Used to set currentRoom on frontend

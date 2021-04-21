@@ -147,7 +147,8 @@ export class GameState extends Schema {
 
   constructor(
     gameSettings: GameSettings = new GameSettings(),
-    playerStates: PlayerState[] = createDummies(gameSettings.maxPlayers)
+    playerStates: PlayerState[] = createDummies(gameSettings.maxPlayers),
+    playerCount: number = 0
   ) {
     super()
     this.gameSettings = gameSettings
@@ -182,7 +183,7 @@ export class GameState extends Schema {
     ]
 
     this.currentRound = 0
-    this.playerCount = 0
+    this.playerCount = playerCount
     this.allPlayerGuessed = false
     this.isAllPlayerGuessed = false
     this.isRoundScoreCalculated = false
