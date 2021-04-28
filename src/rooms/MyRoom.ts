@@ -241,8 +241,6 @@ export class MyRoom extends Room {
       } else if (this.state.gameState.playerCount >= 10) {
         this.state.gameState.gameSettings.betweenRoundsTime = 20
       }
-      // Reset game restart value ( used to set currentRoom on frontend )
-      this.state.gameState.isGameRestarted = false
     })()
   }
 
@@ -276,6 +274,11 @@ export class MyRoom extends Room {
 
     // Used to set currentRoom on frontend
     this.state.gameState.isGameRestarted = true
+
+    this.clock.setTimeout(() => {
+      // Reset it back to false, so player can go to character creation
+      this.state.gameState.isGameRestarted = false
+    }, 100)
   }
 
   // Start the round
