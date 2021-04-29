@@ -77,47 +77,18 @@ export class MyRoom extends Room {
     return products[currentRound]
   }
 
-  handleRandomNameChange(client: any, players: Array<PlayerState>) {
-    // Get the index of the player
-    const index = players.findIndex((e: any) => e.id === client.sessionId)
-
-    // New random player name
-    players[index].name = getName(client.sessionId)
-  }
-
-  handleNameChange(client: any, newName: string, players: Array<PlayerState>) {
-    // Get the index of the player
-    const index = players.findIndex((e: any) => e.id === client.sessionId)
-
-    players[index].name = newName
-  }
-
-  handleAvatarChange(client: any, players: Array<PlayerState>) {
-    // Get the index of the player
-    const index = players.findIndex((e: any) => e.id === client.sessionId)
-
-    // Get him a new random avatar
-    players[index].avatar = getAvatar(players[index].id)
-  }
-
-  handleMaxPlayersChange(
-    client: any,
-    playerCount: number,
-    dummyCount: number,
-    maxPlayers: number
-  ) {
-    // Check if more players are connected then the maxPlayer setting should be
-    if (playerCount > maxPlayers) {
-      // send error message --> playerCount is higher then maxPlayers
-      client.send('error', {
-        type: 'critical',
-        message: 'Sorry - es sind schon mehr Spieler in der Lobby.'
-      })
-      return
-    }
+  updateDummies() {
+    const playerCount = this.state.gameState.playerCount
+    const dummyCount = this.state.gameState.playerStates.filter(
+      (player: any) => player.id === 'dummy'
+    ).length
+    const maxPlayers = this.state.gameState.gameSettings.maxPlayers
 
     // Calculate the amount of dummies to remove / add
     const dummyValue = maxPlayers - playerCount - dummyCount
+
+    console.log('dummyValue')
+    console.log(dummyValue)
 
     if (dummyValue > 0) {
       // add dummies to the playerStates
@@ -146,6 +117,58 @@ export class MyRoom extends Room {
     }
   }
 
+  removePlayer(index: number) {
+    // remove player from state
+    this.state.gameState.playerStates.splice(index, 1)
+
+    // Update playerCount
+    this.state.gameState.playerCount--
+
+    // check if in Lobby
+    if (!this.state.gameState.gameStarted) {
+      // Update Dummies
+      this.updateDummies()
+    }
+  }
+
+  handleRandomNameChange(client: any, players: Array<PlayerState>) {
+    // Get the index of the player
+    const index = players.findIndex((e: any) => e.id === client.sessionId)
+
+    // New random player name
+    players[index].name = getName(client.sessionId)
+  }
+
+  handleNameChange(client: any, newName: string, players: Array<PlayerState>) {
+    // Get the index of the player
+    const index = players.findIndex((e: any) => e.id === client.sessionId)
+
+    players[index].name = newName
+  }
+
+  handleAvatarChange(client: any, players: Array<PlayerState>) {
+    // Get the index of the player
+    const index = players.findIndex((e: any) => e.id === client.sessionId)
+
+    // Get him a new random avatar
+    players[index].avatar = getAvatar(players[index].id)
+  }
+
+  handleMaxPlayersChange(client: any, playerCount: number, maxPlayers: number) {
+    // Check if more players are connected then the maxPlayer setting should be
+    if (playerCount > maxPlayers) {
+      // send error message --> playerCount is higher then maxPlayers
+      client.send('error', {
+        type: 'critical',
+        message: 'Sorry - es sind schon mehr Spieler in der Lobby.'
+      })
+      return
+    }
+
+    // Add / remove dummies in playerState
+    this.updateDummies()
+  }
+
   handleSettings(client: any, message: any, gameSettings: Array<GameSettings>) {
     // Check what setting is changing
     const settingName: any = Object.keys(message)[0]
@@ -160,9 +183,6 @@ export class MyRoom extends Room {
       this.handleMaxPlayersChange(
         client,
         this.state.gameState.playerCount,
-        this.state.gameState.playerStates.filter(
-          (player: any) => player.id === 'dummy'
-        ).length,
         this.state.gameState.gameSettings.maxPlayers
       )
     }
@@ -526,7 +546,8 @@ export class MyRoom extends Room {
 
     try {
       if (consented) {
-        throw new Error('consented leave')
+        // remove player
+        this.removePlayer(playerIndex)
       }
 
       // allow disconnected client to reconnect into this room until 120 seconds
@@ -541,10 +562,7 @@ export class MyRoom extends Room {
       }
 
       // 120 seconds expired. let's remove the client.
-      delete this.state.gameState.playerStates[playerIndex]
-
-      // Update playerCount
-      this.state.gameState.playerCount = this.state.gameState.playerStates.length
+      this.removePlayer(playerIndex)
     }
   }
 
