@@ -1,11 +1,11 @@
 <p align="center">
-  <a href="https://corrogo.kana.jetzt/">
+  <a target="_blank" rel="noopener noreferrer" href="https://preiseraten.de">
     <img alt="GuessThePrice Logo" src="https://res.cloudinary.com/kana/image/upload/v1618221276/ab4cxqilhpp9bizlaton.png" width="153" />
   </a>
 </p>
 
 <h1 align="center">
-  <a href="https://preiseraten.de">GuessThePrice</a>
+  <a target="_blank" rel="noopener noreferrer" href="https://preiseraten.de">GuessThePrice</a>
 </h1>
 
 <h2 align="center">Overview</h2>
@@ -21,10 +21,10 @@
 <h2>Build With</h2>
 
 <ul>
-<li> <a href="https://github.com/sveltejs/svelte">Svelte</a></li>
-<li> <a href="https://github.com/nodejs/node">Node</a></li>
-<li> <a href="https://github.com/expressjs/express">Express</a></li>
-<li> <a href="https://www.colyseus.io/">Colyseus</a></li>
-<li> <a href="https://www.mongodb.com/de">MongoDB</a></li>
-<li> <a href="https://github.com/Automattic/mongoose">Mongoose</a></li>
+<li> <a target="_blank" rel="noopener noreferrer" href="https://github.com/sveltejs/svelte">Svelte</a></li>
+<li> <a target="_blank" rel="noopener noreferrer" href="https://github.com/nodejs/node">Node</a></li>
+<li> <a target="_blank" rel="noopener noreferrer" href="https://github.com/expressjs/express">Express</a></li>
+<li> <a target="_blank" rel="noopener noreferrer" href="https://www.colyseus.io/">Colyseus</a></li>
+<li> <a target="_blank" rel="noopener noreferrer" href="https://www.mongodb.com/de">MongoDB</a></li>
+<li> <a target="_blank" rel="noopener noreferrer" href="https://github.com/Automattic/mongoose">Mongoose</a></li>
 </ul>
