@@ -118,6 +118,14 @@ export class MyRoom extends Room {
   }
 
   removePlayer(index: number) {
+    // if left player was admin - promote other player
+    if (
+      this.state.gameState.playerStates[index].admin &&
+      this.state.gameState.playerStates[1]
+    ) {
+      this.state.gameState.playerStates[1].admin = true
+    }
+
     // remove player from state
     this.state.gameState.playerStates.splice(index, 1)
 
@@ -556,11 +564,6 @@ export class MyRoom extends Room {
       // client returned! let's re-activate it.
       this.state.gameState.playerStates[playerIndex].connected = true
     } catch (e) {
-      // if disconnected player was admin promote other player
-      if (this.state.gameState.playerStates[playerIndex].admin) {
-        this.state.gameState.playerStates[0].admin = true
-      }
-
       // 120 seconds expired. let's remove the client.
       this.removePlayer(playerIndex)
     }
