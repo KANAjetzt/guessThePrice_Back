@@ -7,7 +7,6 @@ import { Server, LobbyRoom } from 'colyseus'
 import { monitor } from '@colyseus/monitor'
 // import socialRoutes from "@colyseus/social/express"
 import { MyRoom } from './rooms/MyRoom'
-import catchAsync from './utils/catchAsync'
 
 dotenv.config({ path: './config.env' })
 

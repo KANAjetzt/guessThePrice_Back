@@ -7,11 +7,9 @@ import {
   GameState,
   PlayerState
 } from './schema/GameState'
-import { getOne } from '../DB/controllers/factory'
 import ProductModel from '../DB/models/product'
 import MetaStats from '../DB/models/metaStats'
 import { getAvatar } from '../utils/getAvatar'
-import { createDummies } from '../utils/createDummies'
 import { getName } from '../utils/nameDE'
 
 // 🛠 WIP 🛠: Get 10 random DB entries
@@ -107,9 +105,6 @@ export class MyRoom extends Room {
 
     // Calculate the amount of dummies to remove / add
     const dummyValue = maxPlayers - playerCount - dummyCount
-
-    console.log('dummyValue')
-    console.log(dummyValue)
 
     if (dummyValue > 0) {
       // add dummies to the playerStates
@@ -218,8 +213,6 @@ export class MyRoom extends Room {
   }
 
   handlePlayerGuess(client: any, message: any, players: Array<PlayerState>) {
-    console.log(client.sessionId, "sent 'action' message: ", message)
-
     // Get the index of the player that guessed the price
     const index = players.findIndex((e: any) => e.id === client.sessionId)
 
@@ -391,8 +384,6 @@ export class MyRoom extends Room {
 
   endGame(players: Array<PlayerState>) {
     // Show scoreboard
-
-    console.log('game has ended')
     // Determine winner --> player with the highest score
     // TODO: Handle 2 Players with the same score
     const winner = players.reduce((prev: any, current: any) => {
@@ -500,8 +491,6 @@ export class MyRoom extends Room {
         })
         return
       }
-
-      console.log('restart Game!')
       this.restartGame()
     })
 
