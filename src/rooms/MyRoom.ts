@@ -9,6 +9,7 @@ import {
 } from './schema/GameState'
 import { getOne } from '../DB/controllers/factory'
 import ProductModel from '../DB/models/product'
+import MetaStats from '../DB/models/metaStats'
 import { getAvatar } from '../utils/getAvatar'
 import { createDummies } from '../utils/createDummies'
 import { getName } from '../utils/nameDE'
@@ -36,6 +37,26 @@ const getProducts = async (productCount: number) => {
   })
 
   return newProducts
+}
+
+const updateMetaStats = async (type: string) => {
+  // Only update if in production
+  if (process.env.PRODUCTION === 'false') return
+
+  // Get current Stats
+  const stats = await (<any>MetaStats.findOne())
+
+  if (type === 'gameStarted') {
+    // Update states on DB
+    stats.gamesStarted++
+  }
+
+  if (type === 'gameEnded') {
+    // Update states on DB
+    stats.gamesEnded++
+  }
+
+  await MetaStats.findOneAndUpdate(undefined, stats)
 }
 
 export class MyRoom extends Room {
@@ -270,6 +291,9 @@ export class MyRoom extends Room {
         this.state.gameState.gameSettings.betweenRoundsTime = 20
       }
     })()
+
+    // Update meta stats
+    updateMetaStats('gameStarted')
   }
 
   restartGame() {
@@ -379,6 +403,9 @@ export class MyRoom extends Room {
 
     // Calculate avgPrecision of winner
     winner.avgPrecision = this.getAvgPrecision(winner.roundScores)
+
+    // Update metaStats
+    updateMetaStats('gameEnded')
   }
 
   onCreate(options: any) {
